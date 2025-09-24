@@ -60,7 +60,8 @@ export const authRouter = router({
                 path: "/",
             });
 
-            const { password: pwd, ...userWithoutPassword } = user;
+            // eslint-disable-next-line
+            const { password: _, ...userWithoutPassword } = user;
 
             return {
                 message: "User logged in successfully",
@@ -99,7 +100,7 @@ export const authRouter = router({
                 });
             }
 
-            let display = displayName.toLowerCase();
+            // let display = displayName.toLowerCase();
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -109,7 +110,7 @@ export const authRouter = router({
                     name,
                     email,
                     password: hashedPassword,
-                    displayName: display
+                    displayName: displayName.toLowerCase(),
                 })
                 .returning();
 
@@ -120,7 +121,8 @@ export const authRouter = router({
                 });
             }
 
-            const { password: pwd, ...userWithoutPassword } = newUser;
+            // eslint-disable-next-line
+            const { password: _, ...userWithoutPassword } = newUser;
 
             return {
                 message: "User registered successfully",

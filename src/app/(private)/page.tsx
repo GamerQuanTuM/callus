@@ -46,7 +46,7 @@ const Home = () => {
 
   const session = useSession()
 
-  const { mutate: toggleFollow,isPending: toggleFollowPending} = trpc.video.toggleFollow.useMutation()
+  const { mutate: toggleFollow, isPending: toggleFollowPending } = trpc.video.toggleFollow.useMutation()
 
   // Fetch videos with cursor-based pagination
   const {
@@ -184,7 +184,7 @@ const Home = () => {
         setIsPlaying(true);
       }
     }
-  }, [currentFeed?.id, isPlaying]);
+  }, [currentFeed, isPlaying]);
 
   // only changes mute state, no loading
   const toggleMute = useCallback(() => {
@@ -196,7 +196,7 @@ const Home = () => {
       currentVideo.muted = newMutedState;
       setIsMuted(newMutedState);
     }
-  }, [currentFeed?.id, isMuted]);
+  }, [currentFeed, isMuted]);
 
   // doesn't pause current video unnecessarily
   useEffect(() => {
@@ -225,7 +225,7 @@ const Home = () => {
         }
       }
     }
-  }, [currentFeedIndex, currentFeed?.id, isMuted]);
+  }, [currentFeedIndex, currentFeed, isMuted, isPlaying]);
 
   // FIXED: Better video loading event handlers
   const handleVideoLoadStart = useCallback(() => {
@@ -639,8 +639,8 @@ const Home = () => {
                     {currentFeed.user.id !== session?.id && (
                       <motion.button
                         className={`px-6 py-2 rounded-full text-sm font-semibold ${currentFeed.isFollowing
-                            ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                            : 'bg-purple-600 hover:bg-purple-700 text-white'
+                          ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                          : 'bg-purple-600 hover:bg-purple-700 text-white'
                           }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}

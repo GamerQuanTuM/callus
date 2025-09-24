@@ -354,7 +354,7 @@ const UploadPage = () => {
                                 />
 
                                 <div className="flex flex-wrap gap-2 mt-3">
-                                    {suggestedHashtags.map((tag, index) => (
+                                    {suggestedHashtags.map((tag) => (
                                         <motion.button
                                             key={tag}
                                             className="bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-full text-xs transition-colors"

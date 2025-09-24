@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Eye, EyeOff, User, Mail, Lock, Github, Chrome } from 'lucide-react';
 import { trpc } from '@/lib/trpc/client';
 import { useRouter } from 'next/navigation';
-import { is } from 'drizzle-orm';
 
 const loginSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -99,7 +98,7 @@ const AuthPage = () => {
             const result = loginSchema.safeParse(formData);
             if (!result.success) {
                 const fieldErrors: { [key: string]: string } = {};
-                result.error.issues.forEach((err: any) => {
+                result.error.issues.forEach((err) => {
                     if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
                 });
                 setErrors(fieldErrors);

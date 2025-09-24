@@ -16,6 +16,7 @@ export const userRouter = router({
                 });
             }
 
+            // eslint-disable-next-line
             const { password, ...userWithoutPassword } = user;
 
             return {
