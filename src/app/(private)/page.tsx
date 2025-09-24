@@ -631,10 +631,10 @@ const Home = () => {
                     <div className="ml-3 flex-1">
                       <div className="flex items-center">
                         <p className="text-white font-semibold text-sm">
-                          {currentFeed.user.displayName}
+                          {currentFeed.user.name}
                         </p>
                       </div>
-                      <p className="text-white/70 text-xs">@{currentFeed.user.name}</p>
+                      <p className="text-white/70 text-xs">@{currentFeed.user.displayName}</p>
                     </div>
                     {currentFeed.user.id !== session?.id && (
                       <motion.button
