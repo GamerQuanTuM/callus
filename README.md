@@ -65,8 +65,8 @@ Edit `.env.local` with your configuration:
 ```env
 DATABASE_URL=postgresql://user:password@host:port/database
 JWT_SECRET=your-secret-key
-NEXTAUTH_SECRET=your-nextauth-secret
-NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_CLOUDINARY_PRESET=your-preset-name
+NEXT_PUBLIC_CLOUDINARY_URL=https://api.cloudinary.com/v1_1/your-cloud-name
 ```
 
 4. Set up the database:
