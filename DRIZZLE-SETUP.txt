@@ -1,0 +1,97 @@
+DRIZZLE / PROJECT SETUP
+
+This file explains how to add environment variables, run Drizzle (drizzle-kit) commands, and start the Next.js project in this repository.
+
+1) Prerequisites
+- Node.js (recommended v18+). Check with: node -v
+- A package manager: pnpm (preferred here because repo contains pnpm-lock), npm or yarn will also work.
+- A Postgres-compatible database (local Postgres, Neon, Supabase, etc.).
+
+If you need pnpm on Windows (PowerShell):
+  npm install -g pnpm
+
+2) Install dependencies
+From the repository root, run (choose one):
+
+PowerShell (pnpm):
+  pnpm install
+
+or (npm):
+  npm install
+
+3) Create your environment file
+Next.js loads environment variables from files like `.env.local` (local-only secrets). Create a `.env.local` in the project root.
+
+Example `.env.local` (replace values with your real connection string / secrets):
+
+DATABASE_URL=postgres://db_user:db_password@localhost:5432/callus_db
+DATABASE_URL=
+JWT_SECRET=SECRET
+NEXT_PUBLIC_CLOUDINARY_PRESET='preset-name'
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME='cloud-name'
+
+Notes about connection strings:
+- Local Postgres: postgres://user:pass@localhost:5432/mydb
+- Neon/Supabase: the provider gives a full connection URL (may require ?sslmode=require)
+
+4) Drizzle / drizzle-kit commands
+This repo includes Drizzle and `drizzle-kit`. Package scripts in `package.json` provide convenient wrappers:
+
+  "generate": "npx drizzle-kit generate"
+  "migrate":  "npx drizzle-kit migrate"
+  "push":     "npx drizzle-kit push"
+
+Use the project scripts so they pick up your local install and config.
+
+Examples (PowerShell):
+
+# Generate types / migration files / client output (depending on your drizzle.config.ts)
+pnpm run generate
+
+# Push the current schema to the database (use with care - this may alter db schema)
+pnpm run push
+
+Where drizzle-config lives:
+- There's a `drizzle.config.ts` in the project root. It controls where migrations are written and how drizzle connects to your DB. You normally don't need to edit it if your `DATABASE_URL` is correct and it already references the same env variable.
+
+5) Typical workflow (local development)
+
+1. Create `.env.local` with `DATABASE_URL` and other envs.
+2. Install deps: `pnpm install` (or `npm install`).
+3. Run migrations (create or apply):
+     pnpm run migrate
+   or if you already have migrations and want to apply them:
+     pnpm run push
+4. (Optional) Generate types / schema artifacts:
+     pnpm run generate
+5. Start the dev server:
+     pnpm run dev
+
+6) Running the Next.js app
+Scripts included in `package.json`:
+  dev   -> `next dev --turbopack`
+  build -> `next build --turbopack`
+  start -> `next start`
+
+Start development server (PowerShell):
+  pnpm run dev
+
+Or with npm:
+  npm run dev
+
+7) Useful commands summary (PowerShell examples)
+
+# install
+pnpm install
+
+# create or edit .env.local at repo root
+notepad .env.local
+
+# run migration generator / interactive migrations
+pnpm run migrate
+
+# generate drift/schema artifacts
+pnpm run generate
+
+# start dev server
+pnpm run dev

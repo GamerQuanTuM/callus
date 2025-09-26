@@ -1,7 +1,7 @@
 import { privateProcedure, router } from "../init";
 import { z } from "zod";
 import { type Bookmark, bookmarks, type Like, likes, users, videos } from "@/lib/db/schema";
-import { and, desc, eq, lt } from "drizzle-orm";
+import { and, desc, eq, lt, inArray } from "drizzle-orm";
 
 export const videoRouter = router({
     create: privateProcedure.input(
@@ -45,28 +45,44 @@ export const videoRouter = router({
             });
 
 
-            // Fetch videos with pagination
             let cursorDate: Date | undefined = undefined;
             if (cursor) {
                 const parsed = new Date(cursor);
                 if (!isNaN(parsed.getTime())) cursorDate = parsed;
             }
 
-            const videoQuery = ctx.db
+            //fetch video ids (limit + 1) to detect hasMore
+            const idRows = await ctx.db
+                .select({ id: videos.id, createdAt: videos.createdAt })
+                .from(videos)
+                .where(cursorDate ? lt(videos.createdAt, cursorDate) : undefined)
+                .orderBy(desc(videos.createdAt))
+                .limit(limit + 1);
+
+            const fetchedIds = idRows.map((r) => r.id);
+            const hasMore = fetchedIds.length > limit;
+            const actualIds = hasMore ? fetchedIds.slice(0, limit) : fetchedIds;
+
+            // If no ids, return empty
+            if (actualIds.length === 0) {
+                return {
+                    feeds: [],
+                    pagination: { nextCursor: null, hasMore: false }
+                };
+            }
+
+            //fetch detailed rows for the selected ids
+            const items = await ctx.db
                 .select()
                 .from(videos)
                 .leftJoin(likes, eq(videos.id, likes.videoId))
                 .leftJoin(bookmarks, eq(videos.id, bookmarks.videoId))
                 .innerJoin(users, eq(videos.userId, users.id))
-                .where(cursorDate ? lt(videos.createdAt, cursorDate) : undefined)
-                .orderBy(desc(videos.createdAt))
-                .limit(limit + 1); // Get one extra to check if there's more
+                .where(inArray(videos.id, actualIds))
+                .orderBy(desc(videos.createdAt));
 
-            const items = await videoQuery;
-
-            // Group by video and transform data
+            // Group by video and aggregate likes/bookmarks
             const videoMap = new Map();
-
             items.forEach((row) => {
                 const video = row.videos;
                 if (!videoMap.has(video.id)) {
@@ -83,13 +99,12 @@ export const videoRouter = router({
                 if (row.bookmarks) videoData.bookmarks.push(row.bookmarks);
             });
 
-            const videoItems = Array.from(videoMap.values());
-            const hasMore = videoItems.length > limit;
-            const actualItems = hasMore ? videoItems.slice(0, limit) : videoItems;
+            // Preserve the order of actualIds
+            const videoItems = actualIds.map((id: string) => videoMap.get(id)).filter(Boolean);
 
             // Transform to desired format
             // In your videoRouter feed procedure, update the transformation:
-            const transformedItems = actualItems.map(item => ({
+            const transformedItems = videoItems.map((item) => ({
                 id: item.id,
                 user: {
                     id: item.user.id, // Add user ID
@@ -111,7 +126,8 @@ export const videoRouter = router({
             // Generate nextCursor from the last item's createdAt. Support Date or string values.
             let nextCursor: string | null = null;
             if (hasMore) {
-                const last = actualItems[actualItems.length - 1];
+                // Use the last item from videoItems (the limited, deduped list) to build the cursor.
+                const last = videoItems[videoItems.length - 1];
                 const lastCreatedAt = last?.createdAt;
                 if (lastCreatedAt instanceof Date) {
                     nextCursor = lastCreatedAt.toISOString();
@@ -159,7 +175,7 @@ export const videoRouter = router({
 
     toggleBookmark: privateProcedure
         .input(z.object({
-            videoId: z.string().uuid(),
+            videoId: z.uuid(),
         }))
         .mutation(async ({ input, ctx }) => {
             const { videoId } = input;
@@ -201,7 +217,7 @@ export const videoRouter = router({
 
             if (followArray.includes(profileId)) {
                 await ctx.db.update(users).set({
-                    following: followArray.filter((id) => id !== profileId)
+                    following: followArray.filter((id: string) => id !== profileId)
                 }).where(eq(users.id, userId));
 
                 return {

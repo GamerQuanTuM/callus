@@ -54,7 +54,7 @@ const Home = () => {
     fetchNextPage,
     hasNextPage,
     isFetching,
-    isLoading
+    isLoading,
   } = trpc.video.feed.useInfiniteQuery(
     { limit: 5 },
     {
@@ -70,6 +70,7 @@ const Home = () => {
       setLoadedFeeds(allFeeds);
     }
   }, [videoData]);
+
 
   // Load more feeds when approaching the end
   useEffect(() => {
@@ -497,16 +498,16 @@ const Home = () => {
         <span className="text-sm font-medium">Upload</span>
       </motion.button>
 
-      {/* Loading Indicator for fetching next page */}
+      {/* Bottom Spinner shown when fetching next page (not initial load) */}
       <AnimatePresence>
-        {isFetching && (
+        {isFetching && !isLoading && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-6 right-6 z-50 bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm"
+            exit={{ opacity: 0, y: 20 }}
+            className="pointer-events-none fixed left-1/2 -translate-x-1/2 bottom-8 z-50"
           >
-            Loading more...
+            <div className="w-12 h-12 rounded-full border-4 border-white/20 border-t-white animate-spin" />
           </motion.div>
         )}
       </AnimatePresence>
