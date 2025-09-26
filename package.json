@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate":"npx drizzle-kit generate",
+    "migrate":"npx drizzle-kit migrate",
+    "push":"npx drizzle-kit push"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
