@@ -27,6 +27,9 @@ const UploadPage = () => {
 
     const { mutate: uploadVideo } = trpc.video.create.useMutation()
 
+    const utils = trpc.useUtils();
+
+
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -127,6 +130,7 @@ const UploadPage = () => {
                     description: `${description.trimEnd()} ${hashtags.trim()}`.trim(),
 
                 })
+                await utils.video.feed.invalidate();
                 setIsUploaded(true);
                 setIsUploading(false);
                 setPreviewUrl('');
